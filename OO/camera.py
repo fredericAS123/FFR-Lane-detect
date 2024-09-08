@@ -5,7 +5,7 @@ class Camera:
     def __init__(self, src=0):
         self.src = src
         self.reopen()
-
+        self.start()
     def reopen(self):
         self.stream = cv2.VideoCapture(self.src)
         self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -54,7 +54,7 @@ class Camera:
 
 if __name__ == '__main__':
     cam0 = Camera(0)
-    cam0.start()
+
 
     while True:
         ret, frame = cam0.read()
