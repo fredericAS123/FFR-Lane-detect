@@ -1,0 +1,91 @@
+import numpy as np
+
+def limit_a_b(value, a, b):
+    # 将 value 限制在 [a, b] 范围内
+    return max(min(value, b), a)
+
+def slope_calculate(begin, end, border):
+    # 计算最小二乘法的斜率
+    xsum = np.sum(np.arange(begin, end))
+    ysum = np.sum(border[begin:end])
+    xysum = np.sum(np.arange(begin, end) * border[begin:end])
+    x2sum = np.sum(np.arange(begin, end) ** 2)
+
+    if (end - begin) * x2sum - xsum ** 2 != 0:
+        result = ((end - begin) * xysum - xsum * ysum) / ((end - begin) * x2sum - xsum ** 2)
+    else:
+        result = slope_calculate.result_last
+
+    slope_calculate.result_last = result
+    return result
+
+slope_calculate.result_last = 0
+
+def calculate_s_i(start, end, border):
+    # 计算斜率和截距
+    num = end - start
+    xsum = np.sum(np.arange(start, end))
+    ysum = np.sum(border[start:end])
+
+    x_average = xsum / num if num > 0 else 0
+    y_average = ysum / num if num > 0 else 0
+
+    slope_rate = slope_calculate(start, end, border)
+    intercept = y_average - slope_rate * x_average
+    return slope_rate, intercept
+
+def cross_fill(image, l_border, r_border, total_num_l, total_num_r, dir_l, dir_r, points_l, points_r):
+    break_num_l = 0
+    break_num_r = 0
+    slope_l_rate = 0
+    intercept_l = 0
+
+    # 检查左边是否存在十字标志位
+    for i in range(1, total_num_l):
+        if dir_l[i - 1:i + 8] == [4, 4, 0, 0, 0, 6, 6, 0, 0]:
+            break_num_l = points_l[i][1]
+            print("break_num-L:", break_num_l)
+            print("I:", i)
+            print("Cross flag: 1")
+            break
+
+    # 检查右边是否存在十字标志位
+    for i in range(1, total_num_r):
+        if dir_r[i - 1:i + 8] == [4, 4, 0, 0, 0, 6, 6, 0, 0]:
+            break_num_r = points_r[i][1]
+            print("break_num-R:", break_num_r)
+            print("I:", i)
+            print("Cross flag: 1")
+            break
+
+    # 如果左右都存在十字标志位并且图像边缘条件满足
+    if break_num_l and break_num_r and image[-1, 4] and image[-1, -4]:
+        # 计算左边边界斜率和截距
+        start = limit_a_b(break_num_l - 15, 0, len(image))
+        end = limit_a_b(break_num_l - 5, 0, len(image))
+        slope_l_rate, intercept_l = calculate_s_i(start, end, l_border)
+
+        # 根据计算得到的斜率和截距更新左边边界
+        for i in range(break_num_l - 5, len(image) - 1):
+            l_border[i] = slope_l_rate * i + intercept_l
+            l_border[i] = limit_a_b(l_border[i], border_min, border_max)
+
+        # 计算右边边界斜率和截距
+        start = limit_a_b(break_num_r - 15, 0, len(image))
+        end = limit_a_b(break_num_r - 5, 0, len(image))
+        slope_l_rate, intercept_l = calculate_s_i(start, end, r_border)
+
+        # 根据计算得到的斜率和截距更新右边边界
+        for i in range(break_num_r - 5, len(image) - 1):
+            r_border[i] = slope_l_rate * i + intercept_l
+            r_border[i] = limit_a_b(r_border[i], border_min, border_max)
+
+# 示例用法：
+image_w = 10
+image_h = 20
+border_min = 0
+border_max = 255
+
+# 初始化 image, l_border, r_border, total_num_l, total_num_r, dir_l, dir_r, points_l, points_r
+
+cross_fill(image, l_border, r_border, total_num_l, total_num_r, dir_l, dir_r, points_l, points_r)
