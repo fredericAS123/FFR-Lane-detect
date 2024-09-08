@@ -7,10 +7,12 @@ import numpy as np
 model = YOLO_(r"D:\yolov8\ultralytics-main\ultralytics-main\ultralytics\runs\detect\train12\weights\best.pt")
 
 class turn_cam(camera.Camera):
-    def __init__(self,  frame1, array0):
+    def __init__(self, src, frame1):
         super().__init__()
+        self.src = src
+        self.reopen()
         self.frame = frame1
-        self.array = array0
+        self.array = []
     def yolo_detect(self):
         results = model(self.frame, show=True)
         for result in results:
