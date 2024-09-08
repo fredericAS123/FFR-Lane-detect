@@ -1,3 +1,6 @@
+"""
+turn_cam 类继承自Camera ，最终没有使用
+"""
 import cv2
 from ultralytics import YOLO as YOLO_
 import time
